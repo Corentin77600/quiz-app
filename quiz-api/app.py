@@ -1,0 +1,47 @@
+from pickle import TRUE
+from flask import Flask, request
+import jwt_utils
+import function
+import json
+import urllib.request
+import sqlite3
+import question
+
+app = Flask(__name__)
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
+@app.route('/')
+def hello_world():
+    return function.hello_world()
+
+@app.route('/quiz-info', methods=['GET'])
+def GetQuizInfo():
+	return function.GetQuizInfo()
+
+@app.route('/login', methods=['POST'])
+def wrongPassword():
+    return function.wrongPassword(request)
+
+@app.route('/questions', methods=['POST'])
+def creerQuestion():
+    return function.creerQuestion()
+
+@app.route('/questions/<id>', methods=['DELETE'])
+def deleteQuestion(id):
+    return function.supprQuestion(id)
+
+@app.route('/questions/<id>', methods=['GET'])
+def getQuestionID(id):
+    return function.getQuestionID(id)
+
+@app.route('/questions/<id>', methods=['PUT'])
+def updateQuestion(id):
+    return function.updateQuestion(id)
+
+# @app.route('/participations', methods=['POST'])
+# def participation():
+#     return function.participation()
+
+if __name__ == "__main__":
+    app.run()
+
