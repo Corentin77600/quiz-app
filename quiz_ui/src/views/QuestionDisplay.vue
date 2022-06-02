@@ -31,6 +31,24 @@
 
     <button type="submit" class="btn btn-primary">Submit</button>
   </form>
+
+  <div>
+    <div class="card mt-2 mb-2">
+      <div class="card-body" v-for="question in questions" :key="question.position">
+        <h4 class="card-title">{{ question.title }}</h4>
+        <p class="card-text">{{ question.text }}</p>
+        <div class="d-flex justify-content-between">
+          <!-- <button class="btn btn-info text-white" @click="editQuestion(question.id)">
+            Edit
+          </button>
+          <button class="btn btn-danger" @click="deleteQuestion(question.id)">
+            Delete
+          </button> -->
+        </div>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <style>
@@ -45,20 +63,21 @@
 
 <script>
 
-import quizApiService from "@/services/quizApiService";
-
+import quizApiService from "../services/quizApiService";
+import axios from 'axios';
+// v-for="question in questions" v-bind:key="question.id"
 export default {
-  name: "Question",
-  props: {
-    question: {
-      type: Object
-    }
+
+  data() {
+    return {
+      questions: [],
+    };
   },
   async created() {
-    console.log("Composant Question 'created'");
-    await quizApiService.getQuestion(1).then((response) => {
-      this.question = question.text;
+    quizApiService.getQuestion(position).then((response) => {
+      this.questions = response.data
+      console.log(this.questions)
     })
-  }
+  },
 };
 </script>

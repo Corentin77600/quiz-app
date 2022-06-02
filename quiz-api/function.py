@@ -18,7 +18,7 @@ def hello_world():
 	return f"Hello, {x}"
 
 def GetQuizInfo():
-	return {"size": 0, "scores": []}, 200
+	return {"size": 2, "scores": [1,2,3]}, 200
 
 def wrongPassword(request):
     payload = request.get_json()

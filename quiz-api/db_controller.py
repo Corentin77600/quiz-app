@@ -7,7 +7,7 @@ import function
 
 class db_controller():
     def __init__(self):
-        connexion = sqlite3.connect("C:\\Users\\Utilisateur\\Documents\\Corentin\\E4\\Dev_Fullstack\\quiz-app\\quiz-app\\quiz-api\\bdd1.db")
+        connexion = sqlite3.connect("C:\\Users\\Utilisateur\\Documents\\Corentin\\E4\\Fullstack_2\\quiz-app\\quiz-api\\bdd1.db")
         connexion.isolation_level = None
         self.connexion = connexion
 
@@ -19,8 +19,6 @@ class db_controller():
             if isinstance(questionToJson[element], str):
                 questionToJson[element] = questionToJson[element].replace("'", "''")
 
-        print("++++++++++++++++++++++++++++++++")
-        print(questionToJson)
         queryVerifyPos = (f"SELECT COUNT(*) FROM Question where position="+str(questionToJson['position']))
         queryUpdatePos = (f"UPDATE Question SET position=position+1  WHERE position>="+str(questionToJson['position']))
         query = (
@@ -32,7 +30,6 @@ class db_controller():
             cursor.execute("begin")
             cursor.execute(queryVerifyPos)
             nb = cursor.fetchone()[0]
-            print(nb)
             if nb >= 1:
                 print("toUpdate")
                 cursor.execute(queryUpdatePos)

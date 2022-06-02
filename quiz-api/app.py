@@ -1,5 +1,6 @@
 from pickle import TRUE
 from flask import Flask, request
+from flask_cors import CORS
 import jwt_utils
 import function
 import json
@@ -9,6 +10,7 @@ import question
 
 app = Flask(__name__)
 app.config['PROPAGATE_EXCEPTIONS'] = True
+CORS(app)
 
 @app.route('/')
 def hello_world():
