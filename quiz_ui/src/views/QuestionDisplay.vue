@@ -17,10 +17,10 @@
     </div>
   </div>
 
-    <ScoreDisplay @endQuiz="handleQuizCompleted"
-      v-show="showModal"
+    <ScoreDisplay
+      v-show="showPopUp"
       :nbreBonnesReponses= nombreBonnesReponses
-      :nbreTotalQuestions= questions.position
+      :nbreTotalQuestions= nombreTotalDeQuestions
       @reload="updateQuiz"
       @close="closeQuiz"
     />
@@ -36,7 +36,6 @@ var position = 1;
 var bonneReponse = 0;
 var mauvaiseReponse = 0;
 var nbreQuestions = 1;
-//var total = data.nombreTotal.toString(2)
 export default {
   /*props: {
     questions: 
@@ -53,7 +52,7 @@ export default {
       nombreBonnesReponses:0,
       nombreMauvaisesReponses:0,
       nombreTotalDeQuestions:0,
-      showModal: false,
+      showPopUp: false,
     };
   },
   async created() {
@@ -67,7 +66,6 @@ export default {
   },
   async updated() {
     this.nombreTotal = position;
-    console.log("NOMBRE TOTAL", this.nombreTotal);
     this.nombreBonnesReponses = bonneReponse;
     this.nombreMauvaisesReponses = mauvaiseReponse;
   },
@@ -78,7 +76,6 @@ export default {
       /* Clear from pollution with ' */
       let userAnswer = pollutedUserAnswer.replace(/'/, "&#039;");
       //set answer
-      console.log(userAnswer);
       this.questions.possibleAnswers[index] = userAnswer;
       let allButtons = document.querySelectorAll(`[index="${index}"]`);
 
@@ -90,17 +87,6 @@ export default {
       this.checkCorrectAnswer(e, index);
       position = position + 1;
       this.loadQuestionByPosition(e,position);
-
-
-    //   quizApiService.getNbreQuestion().then((response) => {
-    //   if(position == response.data) {
-    //       // this.$emit("endQuiz", this.position);
-    //       this.showModal=false;
-    //       console.log("QUIZ FINI!",position);
-    //   }
-    //   console.log(response.data);
-    // })
-      //setTimeout(function () { var i = 1; }, 5000);
     },
 
     async loadQuestionByPosition(e,position)
@@ -108,7 +94,7 @@ export default {
       var curPosition = this.questions.position + 1;
       quizApiService.getNbreQuestion().then((response) => {
         if(curPosition > response.data) {
-            this.showModal=true;
+            this.showPopUp=true;
             this.nombreTotalDeQuestions = response.data;
             console.log(response.data);
         }
@@ -121,15 +107,6 @@ export default {
           })
         }
       })
-
-        
-        // .catch((error) => {
-        //   if (error.response) {
-        //     if (error.response.status === 404) {
-        //     console.log("YA PAS DE QUESTIONS APRES!");
-        //     }
-        //   }
-        // })
     },
 
     // async getIdRep() {
@@ -169,7 +146,6 @@ export default {
         if (this.questions.possibleAnswers[index] === this.questions.possibleAnswers[idRep].text) {
           e.target.classList.add("rightAnswer");
           bonneReponse = bonneReponse + 1;
-          console.log("BR", bonneReponse);
         }
 
         else {
@@ -182,24 +158,22 @@ export default {
             }
           });
           mauvaiseReponse = mauvaiseReponse + 1;
-          console.log("MR", mauvaiseReponse);
         }
       }
       nbreQuestions = bonneReponse + mauvaiseReponse;
-      console.log("NBRETOTAL", nbreQuestions);
-    },
-    handleQuizCompleted() {
-        this.showModal = false;
-        console.log("SCORES");
     },
     updateQuiz() {
-      this.showModal = false;
+      this.showPopUp = false;
       position=1;
+      bonneReponse=0;
+      mauvaiseReponse=0;
       window.location.reload();
     },
     closeQuiz() {
-      this.showModal = false;
+      this.showPopUp = false;
       position=1;
+      bonneReponse=0;
+      mauvaiseReponse=0;
       this.$router.push('/');
     },
   },
