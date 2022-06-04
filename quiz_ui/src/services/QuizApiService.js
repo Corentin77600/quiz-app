@@ -32,5 +32,8 @@ export default {
   },
   getQuestion(position) {
     return this.call("get", "questions/" + position);
+  },
+  getNbreQuestion() {
+    return this.call("get", "questions");
   }
 };

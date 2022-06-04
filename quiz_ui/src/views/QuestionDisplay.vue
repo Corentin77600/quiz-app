@@ -1,83 +1,291 @@
 <template>
-  <form>
-    <div class="form-group">
-      <label for="exampleInputEmail1">Question :</label>
+  <div class="card text-center text-white bg-secondary mx-auto">
+    <div class="card-header">
+    <p class="card-text">Question N°{{ questions.position }}</p>
     </div>
-
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
-      <label class="form-check-label" for="defaultCheck1">
-        Réponse A:
-      </label>
+    <div class="card-body">
+      <h5 class="card-title">{{ questions.title }}</h5>
+      <p class="card-text">{{ questions.text }}</p>
+      <img class="rounded mx-auto d-bloc" style="margin-bottom: 10px;" v-if="questions.image" :src="questions.image" />
+      <form v-if="questions">
+        <button v-for="(answer, index) in questions.possibleAnswers" @click.prevent="answerClickedHandler" class="text-white">{{
+            answer.text
+        }} </button>
+      </form>
     </div>
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
-      <label class="form-check-label" for="defaultCheck1">
-        Réponse B:
-      </label>
-    </div>
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
-      <label class="form-check-label" for="defaultCheck1">
-        Réponse C:
-      </label>
-    </div>
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
-      <label class="form-check-label" for="defaultCheck1">
-        Réponse D:
-      </label>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Submit</button>
-  </form>
-
-  <div>
-    <div class="card mt-2 mb-2">
-      <div class="card-body" v-for="question in questions" :key="question.position">
-        <h4 class="card-title">{{ question.title }}</h4>
-        <p class="card-text">{{ question.text }}</p>
-        <div class="d-flex justify-content-between">
-          <!-- <button class="btn btn-info text-white" @click="editQuestion(question.id)">
-            Edit
-          </button>
-          <button class="btn btn-danger" @click="deleteQuestion(question.id)">
-            Delete
-          </button> -->
-        </div>
-      </div>
+    <div class="card-footer text-muted">
     </div>
   </div>
 
-</template>
+    <ScoreDisplay @endQuiz="handleQuizCompleted"
+      v-show="showModal"
+      :nbreBonnesReponses= nombreBonnesReponses
+      :nbreTotalQuestions= questions.position
+      @reload="updateQuiz"
+      @close="closeQuiz"
+    />
 
-<style>
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-}
-</style>
+</template>
 
 <script>
 
 import quizApiService from "../services/quizApiService";
-import axios from 'axios';
-// v-for="question in questions" v-bind:key="question.id"
-export default {
+import ScoreDisplay from "../views/ScoreDisplay.vue";
 
+var position = 1;
+var bonneReponse = 0;
+var mauvaiseReponse = 0;
+var nbreQuestions = 1;
+//var total = data.nombreTotal.toString(2)
+export default {
+  /*props: {
+    questions: 
+    {
+      type: Object,
+    },
+    nombreTotal: Number,
+  },*/
+  components: { ScoreDisplay },
   data() {
     return {
       questions: [],
+      nombreTotal: 0,
+      nombreBonnesReponses:0,
+      nombreMauvaisesReponses:0,
+      nombreTotalDeQuestions:0,
+      showModal: false,
     };
   },
   async created() {
     quizApiService.getQuestion(position).then((response) => {
-      this.questions = response.data
-      console.log(this.questions)
+      this.questions = response.data;
+      console.log(this.questions);
+      //console.log(this.questions.position)
+      //console.log(this.questions.title)
+      //console.log(this.questions.possibleAnswers[0].isCorrect)
     })
+  },
+  async updated() {
+    this.nombreTotal = position;
+    console.log("NOMBRE TOTAL", this.nombreTotal);
+    this.nombreBonnesReponses = bonneReponse;
+    this.nombreMauvaisesReponses = mauvaiseReponse;
+  },
+  methods: {
+    async answerClickedHandler(e) {
+      let index = e.currentTarget;
+      let pollutedUserAnswer = e.target.innerHTML; // innerHTML is polluted with decoded HTML entities e.g ' from &#039;
+      /* Clear from pollution with ' */
+      let userAnswer = pollutedUserAnswer.replace(/'/, "&#039;");
+      //set answer
+      console.log(userAnswer);
+      this.questions.possibleAnswers[index] = userAnswer;
+      let allButtons = document.querySelectorAll(`[index="${index}"]`);
+
+      for (let i = 0; i < allButtons.length; i++) {
+        if (allButtons[i] === e.target) continue;
+
+        allButtons[i].setAttribute("disabled", "");
+      }
+      this.checkCorrectAnswer(e, index);
+      position = position + 1;
+      this.loadQuestionByPosition(e,position);
+
+
+    //   quizApiService.getNbreQuestion().then((response) => {
+    //   if(position == response.data) {
+    //       // this.$emit("endQuiz", this.position);
+    //       this.showModal=false;
+    //       console.log("QUIZ FINI!",position);
+    //   }
+    //   console.log(response.data);
+    // })
+      //setTimeout(function () { var i = 1; }, 5000);
+    },
+
+    async loadQuestionByPosition(e,position)
+    {
+      var curPosition = this.questions.position + 1;
+      quizApiService.getNbreQuestion().then((response) => {
+        if(curPosition > response.data) {
+            this.showModal=true;
+            this.nombreTotalDeQuestions = response.data;
+            console.log(response.data);
+        }
+        else
+        {
+          quizApiService.getQuestion(position).then((rep) => {
+            this.questions = rep.data;
+            e.target.classList.remove("rightAnswer");
+            e.target.classList.remove("wrongAnswer");
+          })
+        }
+      })
+
+        
+        // .catch((error) => {
+        //   if (error.response) {
+        //     if (error.response.status === 404) {
+        //     console.log("YA PAS DE QUESTIONS APRES!");
+        //     }
+        //   }
+        // })
+    },
+
+    // async getIdRep() {
+    //   var idRep = 0;
+    //   const bonneReponse = "";
+    //   for (var i = 0; i <= this.questions.possibleAnswers.length; i++) {
+    //     if (this.questions.possibleAnswers[i].isCorrect == true) {
+    //       idRep = i;
+    //       break;
+    //     }
+    //   }
+    //   console.log(this.questions.possibleAnswers[idRep].text);
+    //   return this.questions.possibleAnswers[idRep].text;
+    // },
+
+    async checkCorrectAnswer(e, index) {
+      let question = this.questions.possibleAnswers[index];
+      var idRep = 0;
+
+      for (var i = 0; i <= this.questions.possibleAnswers.length; i++) {
+        if (this.questions.possibleAnswers[i].isCorrect == true) {
+          idRep = i;
+          break;
+        }
+      }
+
+      if (question != null) {
+        if (this.index < this.questions.possibleAnswers.length - 1) {
+          setTimeout(
+            function () {
+              this.index += 1;
+            }.bind(this),
+            3000
+          );
+        }
+
+        if (this.questions.possibleAnswers[index] === this.questions.possibleAnswers[idRep].text) {
+          e.target.classList.add("rightAnswer");
+          bonneReponse = bonneReponse + 1;
+          console.log("BR", bonneReponse);
+        }
+
+        else {
+          e.target.classList.add("wrongAnswer");
+          let correctAnswer = this.questions.possibleAnswers[idRep].text;
+          let allButtons = document.querySelectorAll(`[index="${index}"]`);
+          allButtons.forEach(function (button) {
+            if (button.innerHTML === correctAnswer) {
+              button.classList.add("showRightAnswer");
+            }
+          });
+          mauvaiseReponse = mauvaiseReponse + 1;
+          console.log("MR", mauvaiseReponse);
+        }
+      }
+      nbreQuestions = bonneReponse + mauvaiseReponse;
+      console.log("NBRETOTAL", nbreQuestions);
+    },
+    handleQuizCompleted() {
+        this.showModal = false;
+        console.log("SCORES");
+    },
+    updateQuiz() {
+      this.showModal = false;
+      position=1;
+      window.location.reload();
+    },
+    closeQuiz() {
+      this.showModal = false;
+      position=1;
+      this.$router.push('/');
+    },
   },
 };
 </script>
+
+<style>
+form {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+button {
+  font-size: 1.1rem;
+  box-sizing: border-box;
+  padding: 1rem;
+  margin: 0.5rem;
+  width: 40%;
+  background-color: rgba(100, 100, 100, 0.3);
+  border: none;
+  border-radius: 0.4rem;
+  box-shadow: 3px 5px 5px rgba(0, 0, 0, 0.2);
+}
+
+button:hover:enabled {
+  transform: scale(1.02);
+  box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 7px 0 rgba(0, 0, 0, 0.12),
+    0 3px 1px -1px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+button:focus {
+  outline: none;
+}
+
+button:active:enabled {
+  transform: scale(1.05);
+}
+
+@keyframes flashButton {
+  0% {
+    opacity: 1;
+    transform: scale(1.01);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+button.rightAnswer {
+  animation: flashButton;
+  animation-duration: 700ms;
+  animation-delay: 200ms;
+  animation-iteration-count: 3;
+  animation-timing-function: ease-in-out;
+  color: black;
+  background: linear-gradient(210deg,
+      rgba(0, 178, 72, 0.25),
+      rgba(0, 178, 72, 0.5));
+}
+
+button.wrongAnswer {
+  color: black;
+  background: linear-gradient(210deg,
+      rgba(245, 0, 87, 0.25),
+      rgba(245, 0, 87, 0.5));
+}
+
+button.showRightAnswer {
+  animation: flashButton;
+  animation-duration: 700ms;
+  animation-delay: 200ms;
+  animation-iteration-count: 2;
+  animation-timing-function: ease-in-out;
+  color: black;
+  background: linear-gradient(210deg,
+      rgba(0, 178, 72, 0.25),
+      rgba(0, 178, 72, 0.5));
+}
+</style>

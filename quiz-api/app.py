@@ -40,9 +40,17 @@ def getQuestionID(id):
 def updateQuestion(id):
     return function.updateQuestion(id)
 
-# @app.route('/participations', methods=['POST'])
-# def participation():
-#     return function.participation()
+@app.route('/participations', methods=['POST'])
+def participation():
+    return function.participation()
+
+@app.route('/participations', methods=['DELETE'])
+def deleteParticipation():
+    return function.deleteParticipation()
+
+@app.route('/questions', methods = ['GET'])
+def getNumberOfQuestion():
+    return function.getNumberQuestion()
 
 if __name__ == "__main__":
     app.run()

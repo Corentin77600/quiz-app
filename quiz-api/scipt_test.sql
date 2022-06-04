@@ -17,3 +17,5 @@ UPDATE Question SET position=position+1  WHERE (position>=1 AND position<3)
 UPDATE Question SET position=position-1  WHERE (position<=4 AND position>2)
 
 UPDATE Question SET position=position-1  WHERE position >1
+
+INSERT INTO Participants VALUES ("coco",2,1);

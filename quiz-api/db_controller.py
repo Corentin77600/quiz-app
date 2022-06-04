@@ -1,6 +1,7 @@
 import json
 from operator import truediv
 import sqlite3
+from participants import Participants
 import question
 import reponse
 import function
@@ -184,13 +185,39 @@ class db_controller():
     def existQuestion(self, position):
         query = ("SELECT COUNT(*) FROM Question WHERE position="+position)
         cursor = self.connexion.cursor()
+        cursor.execute("begin")
         cursor.execute(query)
         nb = cursor.fetchone()[0]
+        cursor.execute("commit")
         if nb > 0:
             return 1
         else:
             return 0
-        
+    
+    def insertParticipant(self, participant: Participants):
+        query = (f"INSERT INTO Participants (name, answers) VALUES"
+			f"('{participant.name}', '{participant.answer}')")
+        cursor = self.connexion.cursor()
+        cursor.execute("begin")
+        cursor.execute(query)
+        cursor.execute("commit")
+
+    def deleteParticipant(self):
+        query = (f"DELETE FROM Participants")
+        cursor = self.connexion.cursor()
+        cursor.execute("begin")
+        cursor.execute(query)
+        cursor.execute("commit")
+
+    def getNumberOfQuestion(self):
+        query =  (f"SELECT COUNT(*) FROM Question")
+        cursor = self.connexion.cursor()
+        cursor.execute("begin")
+        numberOfQuestionQuery = cursor.execute(query)
+        numberOfQuestion = numberOfQuestionQuery.fetchone()[0]
+        cursor.execute("commit")
+        return numberOfQuestion
+
 
     
 

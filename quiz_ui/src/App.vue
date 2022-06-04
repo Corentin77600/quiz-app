@@ -71,7 +71,7 @@ nav a:first-of-type {
   border: 0;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1920px) {
   body {
     display: flex;
     place-items: center;

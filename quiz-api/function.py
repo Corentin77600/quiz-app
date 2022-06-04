@@ -4,14 +4,7 @@ import jwt_utils
 import json
 from question import Question
 from reponse import Reponse
-
-def pythonToJson(myobject):
-    jsonStr = json.dumps(myobject)
-    return jsonStr
-
-def jsonToPython(jsonData):
-    pythonStr = json.loads(jsonData)
-    return pythonStr
+from participants import Participants
 
 def hello_world():
 	x = 'world'
@@ -106,5 +99,30 @@ def updateQuestion(id):
         return '', 401
 
 
-# def participation():
-#     payload = request.get_json
+def participation():
+    try:
+        payload = request.get_json()
+        name = payload['playerName']
+        score = payload['answer']
+        participant = Participants(name, score)
+        database = db_controller()
+        database.insertParticipant(participant)
+        return '', 200
+    except:
+        return '', 400
+
+def deleteParticipation():
+    try:
+        database = db_controller()
+        database.deleteParticipant()
+        return '', 204  
+    except:
+        return '', 400
+
+def getNumberQuestion():
+    try:
+        database = db_controller()
+        number = database.getNumberOfQuestion()
+        return str(number), 200
+    except:
+        return '', 401
