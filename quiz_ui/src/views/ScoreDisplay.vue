@@ -2,7 +2,7 @@
     <div class="popup-mask">
       <div class="popup-wrapper">
         <div class="popup-container">
-            <h2 class="text-center text-danger" >Félicitations! <br/>Le Quiz est terminé!</h2>
+            <h2 class="text-center text-danger" >Félicitations {{ username }}!<br/>Le Quiz est terminé!</h2>
 
           <div class="card-body">
             <div class="text-center text-secondary">
@@ -37,7 +37,6 @@
 </template>
 
 <script>
-
 export default {
     props: {
     nbreBonnesReponses:
@@ -46,7 +45,10 @@ export default {
     }, 
     nbreTotalQuestions:{
         type:Number
-    }, 
+    },
+    username:{
+        type:String
+    }
   },
 };
 </script>

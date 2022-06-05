@@ -52,6 +52,14 @@ def deleteParticipation():
 def getNumberOfQuestion():
     return function.getNumberQuestion()
 
+@app.route('/login', methods = ['GET'])
+def getLogin():
+    return function.getLogin()
+
+@app.route('/password', methods = ['GET'])
+def getPassword():
+    return function.getPassword()
+
 if __name__ == "__main__":
     app.run()
 

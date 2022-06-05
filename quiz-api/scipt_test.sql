@@ -19,3 +19,13 @@ UPDATE Question SET position=position-1  WHERE (position<=4 AND position>2)
 UPDATE Question SET position=position-1  WHERE position >1
 
 INSERT INTO Participants VALUES ("coco",2,1);
+
+INSERT INTO Participants (name, answers) VALUES ('pmpm', 5)
+
+DELETE FROM Participants
+
+SELECT COUNT(*) FROM Question
+
+INSERT INTO Administration (login, password) VALUES ('admin','testAdmin') 
+
+SELECT * FROM Administration

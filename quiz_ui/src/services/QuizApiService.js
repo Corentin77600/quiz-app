@@ -35,5 +35,17 @@ export default {
   },
   getNbreQuestion() {
     return this.call("get", "questions");
-  }
+  },
+  getLogin() {
+    return this.call("get", "login");
+  },
+  getPassword() {
+    return this.call("get", "password");
+  },
+  setParticipant(username, score) {
+    axios.post('/participations', {
+      name: username,
+      answers: score
+    });
+  },
 };

@@ -126,3 +126,19 @@ def getNumberQuestion():
         return str(number), 200
     except:
         return '', 401
+
+def getLogin():
+    try:
+        database = db_controller()
+        login = database.getLogin()
+        return str(login), 200
+    except:
+        return '', 401
+
+def getPassword():
+    try:
+        database = db_controller()
+        password = database.getPassword()
+        return str(password), 200
+    except:
+        return '', 401

@@ -218,6 +218,24 @@ class db_controller():
         cursor.execute("commit")
         return numberOfQuestion
 
+    def getLogin(self):
+        query =  (f"SELECT * FROM Administration")
+        cursor = self.connexion.cursor()
+        cursor.execute("begin")
+        getLoginQuery = cursor.execute(query)
+        getLogin = getLoginQuery.fetchall()
+        cursor.execute("commit")
+        return getLogin[0][1]
+    
+    def getPassword(self):
+        query =  (f"SELECT * FROM Administration")
+        cursor = self.connexion.cursor()
+        cursor.execute("begin")
+        getPasswordQuery = cursor.execute(query)
+        getPassword = getPasswordQuery.fetchall()
+        cursor.execute("commit")
+        return getPassword[0][2]
+
 
     
 

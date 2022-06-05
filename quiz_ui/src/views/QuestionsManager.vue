@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="card text-center text-white bg-secondary mx-auto">
     <div class="card-header">
     <p class="card-text">Question N°{{ questions.position }}</p>
@@ -13,13 +13,13 @@
         }} </button>
       </form>
     </div>
-    <div class="card-footer text-muted">
-    </div>
   </div>
 
+    <QuestionDisplay :QuestionDisplay.data().questions = th
+    @click.prevent="answerClickedHandler" />
+    
     <ScoreDisplay
       v-show="showPopUp"
-      :username=currentUsername
       :nbreBonnesReponses= nombreBonnesReponses
       :nbreTotalQuestions= nombreTotalDeQuestions
       @reload="updateQuiz"
@@ -29,15 +29,17 @@
 </template>
 
 <script>
+
 import quizApiService from "../services/quizApiService";
 import ScoreDisplay from "../views/ScoreDisplay.vue";
-import participationStorageService from "../services/ParticipationStorageService";
+import QuestionDisplay from "../views/QuestionDisplay.vue";
+
 var position = 1;
 var bonneReponse = 0;
 var mauvaiseReponse = 0;
-var nbreQuestions = 1;
+var nbreQuestions = 0;
 export default {
-  components: { ScoreDisplay },
+  components: { ScoreDisplay, QuestionDisplay },
   data() {
     return {
       questions: [],
@@ -45,24 +47,15 @@ export default {
       nombreBonnesReponses:0,
       nombreMauvaisesReponses:0,
       nombreTotalDeQuestions:0,
-      currentUsername: '',
       showPopUp: false,
     };
   },
   async created() {
-    quizApiService.getQuestion(position).then((response) => {
-      this.questions = response.data;
-      console.log(this.questions);
-      //console.log(this.questions.position)
-      //console.log(this.questions.title)
-      //console.log(this.questions.possibleAnswers[0].isCorrect)
-    })
   },
   async updated() {
-    this.nombreTotal = position;
+    this.nombreTotal = QuestionDisplay.position;
     this.nombreBonnesReponses = bonneReponse;
     this.nombreMauvaisesReponses = mauvaiseReponse;
-    this.currentUsername = participationStorageService.getPlayerName();
   },
   methods: {
     async answerClickedHandler(e) {
@@ -73,14 +66,17 @@ export default {
       //set answer
       this.questions.possibleAnswers[index] = userAnswer;
       let allButtons = document.querySelectorAll(`[index="${index}"]`);
+
       for (let i = 0; i < allButtons.length; i++) {
         if (allButtons[i] === e.target) continue;
+
         allButtons[i].setAttribute("disabled", "");
       }
       this.checkCorrectAnswer(e, index);
       position = position + 1;
       this.loadQuestionByPosition(e,position);
     },
+
     async loadQuestionByPosition(e,position)
     {
       var curPosition = this.questions.position + 1;
@@ -88,14 +84,7 @@ export default {
         if(curPosition > response.data) {
             this.showPopUp=true;
             this.nombreTotalDeQuestions = response.data;
-
-            participationStorageService.saveParticipationScore(bonneReponse);
-            console.log("PSEUDO",participationStorageService.getPlayerName());
-            console.log("SCORE",participationStorageService.getParticipationScore());
-            // quizApiService.setParticipant(participationStorageService.getPlayerName(),participationStorageService.getParticipationScore()).then((response) => {
-            //   console.log("TEST PUSH",response.data);
-            // })
-            
+            console.log(response.data);
         }
         else
         {
@@ -110,12 +99,14 @@ export default {
     async checkCorrectAnswer(e, index) {
       let question = this.questions.possibleAnswers[index];
       var idRep = 0;
+
       for (var i = 0; i <= this.questions.possibleAnswers.length; i++) {
         if (this.questions.possibleAnswers[i].isCorrect == true) {
           idRep = i;
           break;
         }
       }
+
       if (question != null) {
         if (this.index < this.questions.possibleAnswers.length - 1) {
           setTimeout(
@@ -125,10 +116,12 @@ export default {
             3000
           );
         }
+
         if (this.questions.possibleAnswers[index] === this.questions.possibleAnswers[idRep].text) {
           e.target.classList.add("rightAnswer");
           bonneReponse = bonneReponse + 1;
         }
+
         else {
           e.target.classList.add("wrongAnswer");
           let correctAnswer = this.questions.possibleAnswers[idRep].text;
@@ -168,6 +161,7 @@ form {
   flex-wrap: wrap;
   justify-content: center;
 }
+
 button {
   font-size: 1.1rem;
   box-sizing: border-box;
@@ -179,32 +173,39 @@ button {
   border-radius: 0.4rem;
   box-shadow: 3px 5px 5px rgba(0, 0, 0, 0.2);
 }
+
 button:hover:enabled {
   transform: scale(1.02);
   box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 7px 0 rgba(0, 0, 0, 0.12),
     0 3px 1px -1px rgba(0, 0, 0, 0.2);
   cursor: pointer;
 }
+
 button:focus {
   outline: none;
 }
+
 button:active:enabled {
   transform: scale(1.05);
 }
+
 @keyframes flashButton {
   0% {
     opacity: 1;
     transform: scale(1.01);
   }
+
   50% {
     opacity: 0.7;
     transform: scale(1.02);
   }
+
   100% {
     opacity: 1;
     transform: scale(1);
   }
 }
+
 button.rightAnswer {
   animation: flashButton;
   animation-duration: 700ms;
@@ -216,12 +217,14 @@ button.rightAnswer {
       rgba(0, 178, 72, 0.25),
       rgba(0, 178, 72, 0.5));
 }
+
 button.wrongAnswer {
   color: black;
   background: linear-gradient(210deg,
       rgba(245, 0, 87, 0.25),
       rgba(245, 0, 87, 0.5));
 }
+
 button.showRightAnswer {
   animation: flashButton;
   animation-duration: 700ms;
@@ -233,4 +236,4 @@ button.showRightAnswer {
       rgba(0, 178, 72, 0.25),
       rgba(0, 178, 72, 0.5));
 }
-</style>
+</style> -->
