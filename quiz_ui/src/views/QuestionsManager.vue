@@ -1,153 +1,109 @@
-<!-- <template>
-  <div class="card text-center text-white bg-secondary mx-auto">
-    <div class="card-header">
-    <p class="card-text">Question N°{{ questions.position }}</p>
-    </div>
-    <div class="card-body">
-      <h5 class="card-title">{{ questions.title }}</h5>
-      <p class="card-text">{{ questions.text }}</p>
-      <img class="rounded mx-auto d-bloc w-50 h-50" style="margin-bottom: 10px;" v-if="questions.image" :src="questions.image" />
-      <form v-if="questions">
-        <button v-for="(answer, index) in questions.possibleAnswers" @click.prevent="answerClickedHandler" class="text-white">{{
-            answer.text
-        }} </button>
-      </form>
-    </div>
-  </div>
-
-    <QuestionDisplay :QuestionDisplay.data().questions = th
-    @click.prevent="answerClickedHandler" />
-    
-    <ScoreDisplay
-      v-show="showPopUp"
-      :nbreBonnesReponses= nombreBonnesReponses
-      :nbreTotalQuestions= nombreTotalDeQuestions
-      @reload="updateQuiz"
-      @close="closeQuiz"
-    />
-
+<template>
+  <!-- <h1>Question {{ currentQuestionPosition }} / {{ totalNumberOfQuestion }}</h1> -->
+  <QuestionDisplay :question="currentQuestion" @answer-selected="answerClickedHandler" />
+  <ScoreDisplay v-show="showPopUp" :username=currentUsername :nbreBonnesReponses=nombreBonnesReponses
+    :nbreTotalQuestions=totalNumberOfQuestion @reload="updateQuiz" @close="closeQuiz" />
 </template>
 
 <script>
-
 import quizApiService from "../services/quizApiService";
-import ScoreDisplay from "../views/ScoreDisplay.vue";
+import participationStorageService from "../services/ParticipationStorageService";
 import QuestionDisplay from "../views/QuestionDisplay.vue";
+import ScoreDisplay from "../views/ScoreDisplay.vue";
 
-var position = 1;
-var bonneReponse = 0;
-var mauvaiseReponse = 0;
-var nbreQuestions = 0;
 export default {
-  components: { ScoreDisplay, QuestionDisplay },
+  name: "QuestionsManager",
+  components: {
+    QuestionDisplay, ScoreDisplay
+  },
+
   data() {
     return {
-      questions: [],
-      nombreTotal: 0,
-      nombreBonnesReponses:0,
-      nombreMauvaisesReponses:0,
-      nombreTotalDeQuestions:0,
+      currentQuestionPosition: 1,
+      currentScore: 0,
+      totalNumberOfQuestion: 100,
+      currentQuestion: {},
+      currentAnswer: [],
+      currentUsername: '',
+      nombreBonnesReponses: 0,
       showPopUp: false,
     };
   },
-  async created() {
+
+  created() {
+    console.log("Composant QuestionsManager 'created'");
+    this.currentUsername = participationStorageService.getPlayerName();
   },
-  async updated() {
-    this.nombreTotal = QuestionDisplay.position;
-    this.nombreBonnesReponses = bonneReponse;
-    this.nombreMauvaisesReponses = mauvaiseReponse;
+
+  async beforeCreate() {
+    let tempQuestion = await quizApiService.getQuestion(1);
+    let tempQuizInfo = await quizApiService.getQuizInfo();
+
+    this.totalNumberOfQuestion = tempQuizInfo.data.size;
+    this.currentQuestion = tempQuestion.data;
+  },
+  uptated() {
+
   },
   methods: {
-    async answerClickedHandler(e) {
-      let index = e.currentTarget;
-      let pollutedUserAnswer = e.target.innerHTML; // innerHTML is polluted with decoded HTML entities e.g ' from &#039;
-      /* Clear from pollution with ' */
-      let userAnswer = pollutedUserAnswer.replace(/'/, "&#039;");
-      //set answer
-      this.questions.possibleAnswers[index] = userAnswer;
-      let allButtons = document.querySelectorAll(`[index="${index}"]`);
+    async loadQuestionByPosition() {
+      let tempQuestion = await quizApiService.getQuestion(
+        this.currentQuestionPosition
+      );
 
-      for (let i = 0; i < allButtons.length; i++) {
-        if (allButtons[i] === e.target) continue;
-
-        allButtons[i].setAttribute("disabled", "");
-      }
-      this.checkCorrectAnswer(e, index);
-      position = position + 1;
-      this.loadQuestionByPosition(e,position);
+      this.currentQuestion = tempQuestion.data;
     },
 
-    async loadQuestionByPosition(e,position)
-    {
-      var curPosition = this.questions.position + 1;
-      quizApiService.getNbreQuestion().then((response) => {
-        if(curPosition > response.data) {
-            this.showPopUp=true;
-            this.nombreTotalDeQuestions = response.data;
-            console.log(response.data);
-        }
-        else
-        {
-          quizApiService.getQuestion(position).then((rep) => {
-            this.questions = rep.data;
-            e.target.classList.remove("rightAnswer");
-            e.target.classList.remove("wrongAnswer");
-          })
-        }
-      })
+    async endQuiz() {
+      let payload = {
+        playerName: participationStorageService.getPlayerName(),
+        answers: this.currentAnswer,
+      };
+      console.log("payload : ", payload);
+      //await quizApiService.postNewParticipation(payload);
+      participationStorageService.saveParticipationScore(this.nombreBonnesReponses);
+      this.showPopUp = true;
     },
-    async checkCorrectAnswer(e, index) {
-      let question = this.questions.possibleAnswers[index];
-      var idRep = 0;
 
-      for (var i = 0; i <= this.questions.possibleAnswers.length; i++) {
-        if (this.questions.possibleAnswers[i].isCorrect == true) {
-          idRep = i;
-          break;
-        }
+    async answerClickedHandler(Answer, isCorrect, e, text) {
+      this.currentAnswer.push(Answer);
+      console.log(Answer);
+      console.log(isCorrect);
+      console.log(e);
+      console.log(text);
+      if (isCorrect) {
+        this.currentScore += 1;
+        this.nombreBonnesReponses += 1;
+
+        e.classList.add("rightAnswer");
+      } else {
+        e.classList.add("wrongAnswer");
+
+        // let cleanAnswer = e.innerHTML; // innerHTML is polluted with decoded HTML entities e.g ' from &#039;
+        // /* Clear from pollution with ' */
+        // let userAnswer = cleanAnswer.replace(/'/, "&#039;");
+        // if (userAnswer != text) {
+        //   e.classList.add("showRightAnswer");
+        // }
       }
-
-      if (question != null) {
-        if (this.index < this.questions.possibleAnswers.length - 1) {
-          setTimeout(
-            function () {
-              this.index += 1;
-            }.bind(this),
-            3000
-          );
-        }
-
-        if (this.questions.possibleAnswers[index] === this.questions.possibleAnswers[idRep].text) {
-          e.target.classList.add("rightAnswer");
-          bonneReponse = bonneReponse + 1;
-        }
-
-        else {
-          e.target.classList.add("wrongAnswer");
-          let correctAnswer = this.questions.possibleAnswers[idRep].text;
-          let allButtons = document.querySelectorAll(`[index="${index}"]`);
-          allButtons.forEach(function (button) {
-            if (button.innerHTML === correctAnswer) {
-              button.classList.add("showRightAnswer");
-            }
-          });
-          mauvaiseReponse = mauvaiseReponse + 1;
-        }
+      if (this.currentQuestionPosition < this.totalNumberOfQuestion) {
+        this.currentQuestionPosition += 1;
+        this.loadQuestionByPosition();
+      } else {
+        participationStorageService.saveParticipationScore(this.currentScore)
+        this.endQuiz();
       }
-      nbreQuestions = bonneReponse + mauvaiseReponse;
     },
     updateQuiz() {
       this.showPopUp = false;
-      position=1;
-      bonneReponse=0;
-      mauvaiseReponse=0;
+      this.currentQuestionPosition = 1;
+      this.nombreBonnesReponses = 0;
       window.location.reload();
     },
     closeQuiz() {
       this.showPopUp = false;
-      position=1;
-      bonneReponse=0;
-      mauvaiseReponse=0;
+      this.currentQuestionPosition = 1;
+      this.nombreBonnesReponses = 0;
       this.$router.push('/');
     },
   },
@@ -155,13 +111,6 @@ export default {
 </script>
 
 <style>
-form {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
 button {
   font-size: 1.1rem;
   box-sizing: border-box;
@@ -236,4 +185,4 @@ button.showRightAnswer {
       rgba(0, 178, 72, 0.25),
       rgba(0, 178, 72, 0.5));
 }
-</style> -->
+</style>

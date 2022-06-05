@@ -20,13 +20,13 @@ const router = createRouter({
       component: NewQuizPage,
     },
     {
-      path: '/questions',
-      name: 'questions',
+      path: '/questionss',
+      name: 'questionss',
       component: QuestionDisplay,
     },
     {
-      path: '/questionss',
-      name: 'questionss',
+      path: '/questions',
+      name: 'questions',
       component: QuestionsManager,
     },
     {

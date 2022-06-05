@@ -11,7 +11,13 @@ def hello_world():
 	return f"Hello, {x}"
 
 def GetQuizInfo():
-	return {"size": 2, "scores": [1,2,3]}, 200
+    try:
+        database = db_controller()
+        number = database.getNumberOfQuestion()
+        return {"size": number, "scores": [1,2,3]}, 200
+    except:
+        return '', 401
+	# return {"size": 2, "scores": [1,2,3]}, 200
 
 def wrongPassword(request):
     payload = request.get_json()
