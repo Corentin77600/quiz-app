@@ -14,7 +14,9 @@
         </div>
         <p></p>
         <p class="text-center text-danger" v-if="montrer">Mot de passe incorrect!</p>
-        <button type="submit" class="btn btn-dark w-25 h-25" @click.prevent="clickSubmit">Se connecter</button>
+        <div class="col text-center">
+            <button type="submit" class="btn btn-dark w-25 h-25" @click.prevent="clickSubmit">Se connecter</button>
+        </div>
     </form>
 </template>
 
@@ -45,7 +47,7 @@ export default {
 
                     if (loginApi == pseudo && passwordApi == motdepasse) {
                         console.log("REUSSITE");
-                        this.$router.push('/testreussi');
+                        this.$router.push('/admin');
                     }
                     else {
                         this.montrer = true;

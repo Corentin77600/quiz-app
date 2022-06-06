@@ -11,9 +11,9 @@
         :src="question.image" />
       <div class="container" v-for="(answer, index) in this.question.possibleAnswers" v-bind:key="answer.text">
         <div class="row">
-          <div class="col mx-auto my-1"><button
+          <div class="col mx-auto my-1"><button id="reponse"
               class="btn text-dark border border-dark rounded w-100 h-100 mx-auto my-2"
-              style="background-color: #B6D3EE;"
+              style="background-color: #B6D3EE;" :disabled="desactiver"
               @click="$emit('answer-selected', index, answer.isCorrect, $event.target, answer.text)">
               {{ answer.text }}
             </button></div>
@@ -44,6 +44,9 @@ export default {
     question: {
       type: Object,
     },
+    desactiver: {
+      type: Boolean,
+    }
   },
 };
 </script>

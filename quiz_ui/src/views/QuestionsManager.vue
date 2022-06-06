@@ -1,6 +1,7 @@
 <template>
   <!-- <h1>Question {{ currentQuestionPosition }} / {{ totalNumberOfQuestion }}</h1> -->
-  <QuestionDisplay :question="currentQuestion" @answer-selected="answerClickedHandler" />
+  <p></p>
+  <QuestionDisplay :question="currentQuestion" :desactiver="activerBouton" @answer-selected="answerClickedHandler" />
   <ScoreDisplay v-show="showPopUp" :username=currentUsername :nbreBonnesReponses=nombreBonnesReponses
     :nbreTotalQuestions=totalNumberOfQuestion @reload="updateQuiz" @close="closeQuiz" />
 </template>
@@ -10,6 +11,8 @@ import quizApiService from "../services/quizApiService";
 import participationStorageService from "../services/ParticipationStorageService";
 import QuestionDisplay from "../views/QuestionDisplay.vue";
 import ScoreDisplay from "../views/ScoreDisplay.vue";
+
+import axios from "axios";
 
 export default {
   name: "QuestionsManager",
@@ -27,6 +30,7 @@ export default {
       currentUsername: '',
       nombreBonnesReponses: 0,
       showPopUp: false,
+      activerBouton: false,
     };
   },
 
@@ -36,41 +40,49 @@ export default {
   },
 
   async beforeCreate() {
-    let tempQuestion = await quizApiService.getQuestion(1);
-    let tempQuizInfo = await quizApiService.getQuizInfo();
+    let initQuestion = await quizApiService.getQuestion(1);
+    let initQuizInfo = await quizApiService.getQuizInfo();
 
-    this.totalNumberOfQuestion = tempQuizInfo.data.size;
-    this.currentQuestion = tempQuestion.data;
-  },
-  uptated() {
+    this.totalNumberOfQuestion = initQuizInfo.data.size;
+    this.currentQuestion = initQuestion.data;
+    // console.log(this.totalNumberOfQuestion);
+    // console.log(this.currentQuestion);
 
   },
   methods: {
     async loadQuestionByPosition() {
-      let tempQuestion = await quizApiService.getQuestion(
+      let initQuestion = await quizApiService.getQuestion(
         this.currentQuestionPosition
       );
 
-      this.currentQuestion = tempQuestion.data;
+      this.currentQuestion = initQuestion.data;
+      this.activerBouton = false;
     },
 
     async endQuiz() {
+      // let index = this.currentAnswer + 1
       let payload = {
         playerName: participationStorageService.getPlayerName(),
         answers: this.currentAnswer,
       };
       console.log("payload : ", payload);
-      //await quizApiService.postNewParticipation(payload);
+      //await quizApiService.postParticipation(payload);
+      // let postParticipation = quizApiService.postParticipation(payload);
+      // console.log(postParticipation.data);
+
+      var headers = {
+        "Content-Type": "application/json",
+      };
+      await axios.post("http://localhost:5000/participations", payload, { headers })
+        .then(reponse => console.log("REPONSE API", reponse));
+
       participationStorageService.saveParticipationScore(this.nombreBonnesReponses);
       this.showPopUp = true;
     },
 
-    async answerClickedHandler(Answer, isCorrect, e, text) {
-      this.currentAnswer.push(Answer);
-      console.log(Answer);
-      console.log(isCorrect);
-      console.log(e);
-      console.log(text);
+    async answerClickedHandler(Answer, isCorrect, e, text, desactiver) {
+      let index = Answer + 1;
+      this.currentAnswer.push(index);
       if (isCorrect) {
         this.currentScore += 1;
         this.nombreBonnesReponses += 1;
@@ -93,6 +105,7 @@ export default {
         participationStorageService.saveParticipationScore(this.currentScore)
         this.endQuiz();
       }
+      this.activerBouton = true;
     },
     updateQuiz() {
       this.showPopUp = false;

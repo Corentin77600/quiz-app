@@ -14,10 +14,28 @@ def GetQuizInfo():
     try:
         database = db_controller()
         number = database.getNumberOfQuestion()
-        return {"size": number, "scores": [1,2,3]}, 200
-    except:
+        score = database.getNumberOfParticipation()
+        participants = []
+        if score == 0:
+            participants = []
+        else:
+            #trie par ordre décroissant
+            partTrie = database.orderByScore()
+            print(partTrie)
+            for part in partTrie:
+                participants.append({
+                    'playerName': part[0],
+                    'score': part[1]
+                })
+        jsonQuiz = {
+            "size": number,
+            "scores": participants
+        }
+        
+        return jsonQuiz, 200
+    except Exception as e:
+        print(e)
         return '', 401
-	# return {"size": 2, "scores": [1,2,3]}, 200
 
 def wrongPassword(request):
     payload = request.get_json()
@@ -42,23 +60,25 @@ def creerQuestion():
             return '', 200
         else:
              return '', 401
-    except:
+    except Exception as e:
+        print(e)
         return '', 401
 
 
 def supprQuestion(id):
     token = request.headers.get('Authorization')
-    
+    try:
+        if token:
+            if existQuestion(id) == 0:
+                return '',404
+            database = db_controller()
+            idToDelete = database.deleteQuestion(id)
+            database.deleteAnswer(idToDelete)
+            return '', 204
 
-    if token:
-        if existQuestion(id) == 0:
-            return '',404
-        database = db_controller()
-        idToDelete = database.deleteQuestion(id)
-        database.deleteAnswer(idToDelete)
-        return '', 204
-
-    return '', 401
+    except Exception as e:
+        print(e)
+        return '', 401
 
 def existQuestion(id):
     database = db_controller()
@@ -66,7 +86,6 @@ def existQuestion(id):
     
 
 def getQuestionID(id):
-
     try:
         if existQuestion(id) == 0:
             return '',404
@@ -83,7 +102,8 @@ def updateQuestion(id):
         if existQuestion(id) == 0:
             return '',404
     
-    except:
+    except Exception as e:
+        print(e)
         return '', 401
     token = request.headers.get('Authorization')
 
@@ -101,7 +121,8 @@ def updateQuestion(id):
             qst = Question(title, text,image, position, reponses)
             database.updateQuestion(id, qst, length)
             return '', 200
-    except:
+    except Exception as e:
+        print(e)
         return '', 401
 
 
@@ -109,28 +130,56 @@ def participation():
     try:
         payload = request.get_json()
         name = payload['playerName']
-        score = payload['answer']
-        participant = Participants(name, score)
-        database = db_controller()
-        database.insertParticipant(participant)
-        return '', 200
-    except:
-        return '', 400
+        score = getScore(payload['answers'])
+        if(score!= -1):
+            participant = Participants(name, score)
+            database = db_controller()
+            if database.checkExistParticipant(name) > 0:
+                database.updateParticipation(participant)
+            else:
+                database.insertParticipant(participant)
+            return {"playerName": name, "score": score}, 200
+        else:
+            return '', 400
+    except Exception as e:
+        print(e)
+        return '', 401
+
+
+def getScore(answers):
+    score = 0
+    database = db_controller()
+    number = database.getNumberOfQuestion()
+    if(len(answers) != number):
+        return -1
+    else:
+        for i in range(0, number):
+            if(answers[i]== getGoodAnswerAtIndex(number, i)):
+                score = score+1
+    print(score)
+    return score
+
+def getGoodAnswerAtIndex(number, i):
+    database = db_controller()
+    tabAnsw = database.getGoodAnswer(number)
+    return tabAnsw[i]
 
 def deleteParticipation():
     try:
         database = db_controller()
         database.deleteParticipant()
         return '', 204  
-    except:
-        return '', 400
+    except Exception as e:
+        print(e)
+        return '', 401
 
 def getNumberQuestion():
     try:
         database = db_controller()
         number = database.getNumberOfQuestion()
         return str(number), 200
-    except:
+    except Exception as e:
+        print(e)
         return '', 401
 
 def getLogin():
@@ -138,7 +187,8 @@ def getLogin():
         database = db_controller()
         login = database.getLogin()
         return str(login), 200
-    except:
+    except Exception as e:
+        print(e)
         return '', 401
 
 def getPassword():
@@ -146,5 +196,6 @@ def getPassword():
         database = db_controller()
         password = database.getPassword()
         return str(password), 200
-    except:
+    except Exception as e:
+        print(e)
         return '', 401

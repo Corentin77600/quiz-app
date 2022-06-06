@@ -1,16 +1,57 @@
+from dataclasses import dataclass
 import json
-from operator import truediv
+from operator import length_hint, truediv
 import sqlite3
+from tkinter.tix import INTEGER
+from app import getNumberOfQuestion 
 from participants import Participants
 import question
 import reponse
 import function
+import numpy as np
 
 class db_controller():
     def __init__(self):
         connexion = sqlite3.connect("C:\\Users\\Utilisateur\\Documents\\Corentin\\E4\\Fullstack_2\\quiz-app\\quiz-api\\bdd1.db")
         connexion.isolation_level = None
         self.connexion = connexion
+
+    def getNumberOfParticipation(self):
+        query = (f"SELECT COUNT(*) FROM Participants")
+        cursor = self.connexion.cursor()
+        cursor.execute("begin")
+        nb = cursor.execute(query)
+        nb1 = nb.fetchone()[0]
+        cursor.execute("commit")
+        return nb1
+
+    def getGoodAnswer(self, length):
+        cursor = self.connexion.cursor()
+        cursor.execute("begin")
+        querySelectIdRep = (f"SELECT id FROM Reponse WHERE isCorrect = 'True'")
+        idRep = cursor.execute(querySelectIdRep).fetchall()
+        score = np.zeros(length, dtype=int)
+        print(length)
+        print(score)
+        print(idRep[1][0])
+        i = 0
+        while i<length:
+            score[i] = int(idRep[i][0]) -(4*i)
+            i = i+1
+        print(score) 
+        cursor.execute("commit")
+        return score
+
+
+    def orderByScore(self):
+        cursor = self.connexion.cursor()
+        cursor.execute("begin")
+        query = (f"SELECT name, answers FROM Participants ORDER BY answers DESC")
+        partTrie = cursor.execute(query).fetchall()
+        cursor.execute("commit")
+        return partTrie
+
+
 
     def insertQuestion(self, question: question.Question):
         questionToJson = question.pythonToJson(question.reponses)
@@ -100,20 +141,20 @@ class db_controller():
         answer =[]
         isCorrect = False
         for rep in data2:
-            print(rep[2])
+            # print(rep[2])
             if rep[2] == "True":
                  isCorrect = True
             if rep[2] == "False":
-                print("false")
+                # print("false")
                 isCorrect = False
-            print(isCorrect)
+            # print(isCorrect)
             answer.append({
             'text': rep[1],
             'isCorrect': isCorrect
         })
         #answer as Json format
         answerJson = json.dumps(answer)
-        print(answerJson)
+        # print(answerJson)
         qst = question.Question(data[0][0], data[0][1], data[0][2],  data[0][3], answer)
         jsonQST = qst.pythonToJson(qst.reponses)
         return jsonQST
@@ -196,10 +237,32 @@ class db_controller():
     
     def insertParticipant(self, participant: Participants):
         query = (f"INSERT INTO Participants (name, answers) VALUES"
-			f"('{participant.name}', '{participant.answer}')")
+			f"('{participant.name}', '{participant.score}')")
         cursor = self.connexion.cursor()
         cursor.execute("begin")
         cursor.execute(query)
+        cursor.execute("commit")
+
+    def checkExistParticipant(self, name):
+        query = (f"SELECT COUNT(*) FROM Participants WHERE name = '{name}'")
+        cursor = self.connexion.cursor()
+        cursor.execute("begin")
+        exist = cursor.execute(query).fetchone()[0]
+        cursor.execute("commit")
+        if int(exist) > 0:
+            return 1
+        else:
+            return 0
+        
+
+    def updateParticipation(self, participant:Participants):
+        query = (f"UPDATE Participants SET answers = ? WHERE name=?")
+        query2 = (f"SELECT answers FROM Participants WHERE name = '{participant.name}'")
+        cursor = self.connexion.cursor()
+        cursor.execute("begin")
+        score = cursor.execute(query2).fetchone()[0]
+        if(score < participant.score):
+            cursor.execute(query, (participant.score, participant.name))
         cursor.execute("commit")
 
     def deleteParticipant(self):

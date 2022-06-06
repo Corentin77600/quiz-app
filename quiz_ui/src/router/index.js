@@ -4,7 +4,7 @@ import NewQuizPage from '../views/NewQuizPage.vue'
 import QuestionDisplay from '../views/QuestionDisplay.vue'
 import QuestionsManager from '../views/QuestionsManager.vue'
 import LoginDisplay from '../views/LoginDisplay.vue'
-import TestReussi from '../views/TestReussi.vue'
+import AdministrationDisplay from '../views/AdministrationDisplay.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,9 +35,9 @@ const router = createRouter({
       component: LoginDisplay,
     },
     {
-      path: '/testreussi',
-      name: 'testreussi',
-      component: TestReussi,
+      path: '/admin',
+      name: 'admin',
+      component: AdministrationDisplay,
     }
   ]
 })

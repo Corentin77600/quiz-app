@@ -1,6 +1,6 @@
 class Participants():
-    def __init__(self, name, answer):
+    def __init__(self, name, score):
         self.name = name
-        self.answer = answer
+        self.score = score
 
     
