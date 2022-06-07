@@ -1,12 +1,6 @@
-from pickle import TRUE
 from flask import Flask, request
 from flask_cors import CORS
-import jwt_utils
 import function
-import json
-import urllib.request
-import sqlite3
-import question
 
 app = Flask(__name__)
 app.config['PROPAGATE_EXCEPTIONS'] = True
@@ -32,9 +26,9 @@ def creerQuestion():
 def deleteQuestion(id):
     return function.supprQuestion(id)
 
-@app.route('/questions/<id>', methods=['GET'])
-def getQuestionID(id):
-    return function.getQuestionID(id)
+@app.route('/questions/<position>', methods=['GET'])
+def getQuestionID(position):
+    return function.getQuestionID(position)
 
 @app.route('/questions/<id>', methods=['PUT'])
 def updateQuestion(id):
@@ -59,6 +53,10 @@ def getLogin():
 @app.route('/password', methods = ['GET'])
 def getPassword():
     return function.getPassword()
+
+@app.route('/answers/<position>', methods = ['GET'])
+def getAnswers(position):
+    return function.getAnswers(position)
 
 if __name__ == "__main__":
     app.run()

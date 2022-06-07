@@ -33,7 +33,6 @@
 import quizApiService from "@/services/quizApiService";
 
 export default {
-  //v-for="scoreEntry in registeredScores" v-bind:key="scoreEntry.length"
   data() {
     return {
       registeredScores: [],
@@ -43,7 +42,6 @@ export default {
     console.log("Composant Home page 'created'");
     await quizApiService.getQuizInfo().then((response) => {
       this.registeredScores = response.data;
-      console.log(this.registeredScores);
     })
 
   }

@@ -1,7 +1,6 @@
 from flask import Flask, request
 from db_controller import db_controller
 import jwt_utils
-import json
 from question import Question
 from reponse import Reponse
 from participants import Participants
@@ -75,22 +74,23 @@ def supprQuestion(id):
             idToDelete = database.deleteQuestion(id)
             database.deleteAnswer(idToDelete)
             return '', 204
-
+        else:
+            return '', 401
     except Exception as e:
         print(e)
         return '', 401
 
-def existQuestion(id):
+def existQuestion(position):
     database = db_controller()
-    return database.existQuestion(id)
+    return database.existQuestion(position)
     
 
-def getQuestionID(id):
+def getQuestionID(position):
     try:
-        if existQuestion(id) == 0:
+        if existQuestion(position) == 0:
             return '',404
         database = db_controller()
-        qst = database.getQuestion(id)
+        qst = database.getQuestion(position)
         return qst, 200
 
     except Exception as e:
@@ -150,7 +150,7 @@ def getScore(answers):
     score = 0
     database = db_controller()
     number = database.getNumberOfQuestion()
-    if(len(answers) != number):
+    if((len(answers) != number) or (number == 0)):
         return -1
     else:
         for i in range(0, number):
@@ -196,6 +196,15 @@ def getPassword():
         database = db_controller()
         password = database.getPassword()
         return str(password), 200
+    except Exception as e:
+        print(e)
+        return '', 401
+
+def getAnswers(position):
+    try:
+        database = db_controller()
+        answers = database.getAllAnswers(position)
+        return answers, 200
     except Exception as e:
         print(e)
         return '', 401

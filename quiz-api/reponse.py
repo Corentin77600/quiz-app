@@ -10,6 +10,3 @@ class Reponse():
             'text': self.text,
             'isCorrect': self.isCorrect
         }
-
-    def jsonToPython(json):
-        return Reponse(json['idQuestion'], json['text'], json['isCorrect'])

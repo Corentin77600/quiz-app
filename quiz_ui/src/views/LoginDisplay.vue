@@ -22,6 +22,7 @@
 
 <script>
 import quizApiService from "../services/quizApiService";
+import { isLogged, setLogged } from '../App.vue';
 
 export default {
     data() {
@@ -31,14 +32,22 @@ export default {
             montrer: false,
         };
     },
+    async created() {
+
+        if (isLogged == false) {
+            this.$router.push('/login');
+        }
+
+        if (isLogged == true) {
+            this.$router.push('/admin');
+        }
+    },
     methods: {
         async clickSubmit() {
             var pseudo = this.login;
             var motdepasse = this.password;
             var loginApi;
             var passwordApi;
-            // console.log(pseudo);
-            // console.log(motdepasse);
             quizApiService.getLogin().then((responseLogin) => {
                 loginApi = responseLogin.data;
 
@@ -46,24 +55,15 @@ export default {
                     passwordApi = responsePassword.data;
 
                     if (loginApi == pseudo && passwordApi == motdepasse) {
-                        console.log("REUSSITE");
+                        setLogged(true);
+                        console.log(isLogged);
                         this.$router.push('/admin');
                     }
                     else {
                         this.montrer = true;
-                        console.log("1", loginApi);
-                        console.log("2", pseudo);
-                        console.log("3", passwordApi);
-                        console.log("4", motdepasse);
-                        console.log("ECHEC");
                     }
-
                 })
             })
-
-
-
-
         }
     }
 

@@ -1,5 +1,9 @@
-<script setup>
-
+<script>
+export { isLogged, setLogged };
+let isLogged = false;
+function setLogged(value) {
+  isLogged = value;
+}
 </script>
 
 <template>
@@ -19,7 +23,7 @@
   </nav>
 
   <RouterView />
-  
+
 </template>
 
 <style>

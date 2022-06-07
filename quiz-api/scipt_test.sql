@@ -1,10 +1,21 @@
 DELETE FROM Reponse;
 DELETE FROM Question;
+DELETE FROM Participants;
 
 delete from sqlite_sequence where name='Question';
 delete from sqlite_sequence where name='Reponse';
+delete from sqlite_sequence where name='Participants';
 
 UPDATE Question SET title = 'blblbl' WHERE id=1
+
+SELECT name, answers FROM Participants ORDER BY answers DESC
+
+SELECT COUNT(*) FROM Participants WHERE name = 'Fritz'
+
+UPDATE Participants SET answers = 4 WHERE name= 'Fritz'
+SELECT answers FROM Participants WHERE name = 'Bruno'
+
+SELECT answers, name FROM Participants 
 
 SELECT COUNT(*) FROM Reponse WHERE idQuestion=1;
 
@@ -29,3 +40,6 @@ SELECT COUNT(*) FROM Question
 INSERT INTO Administration (login, password) VALUES ('admin','testAdmin') 
 
 SELECT * FROM Administration
+
+SELECT * FROM Question
+SELECT MIN(idQuestion) FROM Reponse WHERE isCorrect = 'True'

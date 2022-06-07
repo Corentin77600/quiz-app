@@ -45,8 +45,6 @@ export default {
 
     this.totalNumberOfQuestion = initQuizInfo.data.size;
     this.currentQuestion = initQuestion.data;
-    // console.log(this.totalNumberOfQuestion);
-    // console.log(this.currentQuestion);
 
   },
   methods: {
@@ -60,15 +58,10 @@ export default {
     },
 
     async endQuiz() {
-      // let index = this.currentAnswer + 1
       let payload = {
         playerName: participationStorageService.getPlayerName(),
         answers: this.currentAnswer,
       };
-      console.log("payload : ", payload);
-      //await quizApiService.postParticipation(payload);
-      // let postParticipation = quizApiService.postParticipation(payload);
-      // console.log(postParticipation.data);
 
       var headers = {
         "Content-Type": "application/json",

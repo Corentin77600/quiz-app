@@ -1,53 +1,47 @@
 <template>
-    <div class="popup-mask">
-      <div class="popup-wrapper">
-        <div class="popup-container">
-            <h2 class="text-center text-danger" >Félicitations {{ username }}!<br/>Le Quiz est terminé!</h2>
+  <div class="popup-mask">
+    <div class="popup-wrapper">
+      <div class="popup-container">
+        <h2 class="text-center text-danger">Félicitations {{ username }}!<br />Le Quiz est terminé!</h2>
 
-          <div class="card-body">
-            <div class="text-center text-secondary">
-              Vous avez eu 
-              <span class="text-danger">
-                {{ nbreBonnesReponses }}
-                </span> bonnes réponses sur 
-              <span class="text-danger">
-                {{ nbreTotalQuestions }}
-              </span>
-              questions.
-            </div>
+        <div class="card-body">
+          <div class="text-center text-secondary">
+            Vous avez eu
+            <span class="text-danger">
+              {{ nbreBonnesReponses }}
+            </span> bonnes réponses sur
+            <span class="text-danger">
+              {{ nbreTotalQuestions }}
+            </span>
+            questions.
           </div>
+        </div>
 
-          <div class="btn-toolbar" style="justify-content: space-between;">
-            <button
-              class="btn btn-primary"
-              @click="$emit('reload')"
-            >
-              Play Again
-            </button>
-            <button
-              class="btn btn-danger"
-              @click="$emit('close')"
-            >
-              Close
-            </button>
-          </div>
+        <div class="btn-toolbar" style="justify-content: space-between;">
+          <button class="btn btn-primary" @click="$emit('reload')">
+            Rejouer
+          </button>
+          <button class="btn btn-danger" @click="$emit('close')">
+            Quitter
+          </button>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
 export default {
-    props: {
+  props: {
     nbreBonnesReponses:
     {
-        type:Number
-    }, 
-    nbreTotalQuestions:{
-        type:Number
+      type: Number
     },
-    username:{
-        type:String
+    nbreTotalQuestions: {
+      type: Number
+    },
+    username: {
+      type: String
     }
   },
 };
@@ -81,5 +75,4 @@ export default {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
   transition: all 0.3s ease;
 }
-
 </style>

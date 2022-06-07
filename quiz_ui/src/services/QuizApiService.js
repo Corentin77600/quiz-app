@@ -31,7 +31,7 @@ export default {
     return this.call("get", "quiz-info");
   },
   getQuestion(position) {
-    return this.call("get", "questions" + position);
+    return this.call("get", "questions/" + position);
   },
   getNbreQuestion() {
     return this.call("get", "questions");
@@ -41,5 +41,8 @@ export default {
   },
   getPassword() {
     return this.call("get", "password");
+  },
+  getAnswers(position) {
+    return this.call("get", "answers/" + position);
   }
 };

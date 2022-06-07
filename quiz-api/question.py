@@ -10,7 +10,6 @@ class Question():
     def pythonToJson(self, questionPA):
         json = {}
         dict_rep = []
-        print("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
         print(self.image)
         for rep in questionPA:
             dict_rep.append({
@@ -29,11 +28,4 @@ class Question():
         json = dict_data
         return json
 
-    def jsonToPython(json):
-        title = json[0][0]
-        text = json[0][1]
-        image = json [0][2]
-        position = json[0][3]
-        id = json[0][4]
-        return Question(title, position, text, image,  '', id)
     

@@ -1,13 +1,9 @@
-from dataclasses import dataclass
 import json
-from operator import length_hint, truediv
 import sqlite3
-from tkinter.tix import INTEGER
-from app import getNumberOfQuestion 
+from typing import final
 from participants import Participants
 import question
 import reponse
-import function
 import numpy as np
 
 class db_controller():
@@ -21,24 +17,24 @@ class db_controller():
         cursor = self.connexion.cursor()
         cursor.execute("begin")
         nb = cursor.execute(query)
-        nb1 = nb.fetchone()[0]
+        nbPart = nb.fetchone()[0]
         cursor.execute("commit")
-        return nb1
+        return nbPart
 
     def getGoodAnswer(self, length):
         cursor = self.connexion.cursor()
         cursor.execute("begin")
         querySelectIdRep = (f"SELECT id FROM Reponse WHERE isCorrect = 'True'")
+        queryIdQuestion = (f"SELECT MIN(idQuestion) FROM Reponse WHERE isCorrect = 'True'")
         idRep = cursor.execute(querySelectIdRep).fetchall()
         score = np.zeros(length, dtype=int)
-        print(length)
-        print(score)
-        print(idRep[1][0])
         i = 0
+        idMin = cursor.execute(queryIdQuestion).fetchone()[0]
         while i<length:
-            score[i] = int(idRep[i][0]) -(4*i)
-            i = i+1
-        print(score) 
+            score[i] = (int(idRep[i][0]) -(4*(idMin-1)))
+            i = i+1 
+            idMin = idMin+1
+        print(score)
         cursor.execute("commit")
         return score
 
@@ -85,11 +81,10 @@ class db_controller():
 
     def deleteQuestion(self, position):
         select_Query = (f"SELECT id FROM Question WHERE position="+position)
-
         delete_Query = (f"DELETE FROM Question WHERE position="+position)
         update_query = (f"UPDATE Question SET position=position-1  WHERE position >"+ position)
+
         cursor = self.connexion.cursor()
-        #nb_Selected = 0
         cursor.execute("begin")
         id = cursor.execute(select_Query)
         idToDelete = id.fetchone()[0]
@@ -111,7 +106,6 @@ class db_controller():
 			f"('{reponseToJson['idQuestion']}', '{reponseToJson['text']}', '{reponseToJson['isCorrect']}')"
 		)
         cursor = self.connexion.cursor()
-
         cursor.execute("begin")
         cursor.execute(query)
         cursor.execute("commit")
@@ -119,7 +113,6 @@ class db_controller():
     def deleteAnswer(self, idQuestion):
         query = (f"DELETE FROM Reponse WHERE idQuestion="+ idQuestion)
         cursor = self.connexion.cursor()
-
         cursor.execute("begin")
         cursor.execute(query)
         cursor.execute("commit")
@@ -127,16 +120,15 @@ class db_controller():
     def getQuestion(self, position):
         query1 = (f"SELECT * FROM Question WHERE position="+position)
         cursor = self.connexion.cursor()
-
         cursor.execute("begin")
-        q1 = cursor.execute(query1)
-        data = q1.fetchall()
+        qst = cursor.execute(query1)
+        data = qst.fetchall()
         cursor.execute("commit")
         id = data[0][4]
         cursor.execute("begin")
         query2 = (f"SELECT * FROM Reponse WHERE idQuestion="+str(id))
-        q2 = cursor.execute(query2)
-        data2 = q2.fetchall()
+        rep = cursor.execute(query2)
+        data2 = rep.fetchall()
         cursor.execute("commit")
         answer =[]
         isCorrect = False
@@ -166,7 +158,6 @@ class db_controller():
         queryID = (f"SELECT id FROM Question WHERE position="+id)
         queryDelete = (f"DELETE FROM Reponse WHERE id=(SELECT MAX(id) FROM Reponse WHERE idQuestion="+id+")")
         querySelect = (f"SELECT COUNT(*) FROM Reponse WHERE idQuestion="+id)
-        
         queryVerifyPos = (f"SELECT COUNT(*) FROM Question where position="+str(questionToJson['position']))
         queryUpdatePosUp = (f"UPDATE Question SET position=position+1  WHERE (position>="+str(questionToJson['position'])+" AND position<"+id+")")
         queryUpdatePosDown = (f"UPDATE Question SET position=position-1  WHERE (position<="+str(questionToJson['position'])+" AND position>"+id+")")
@@ -205,7 +196,7 @@ class db_controller():
         cursor.execute(queryNewPos)
         cursor.execute("commit")
 
-        query2 = (f"UPDATE Reponse SET text = ?, isCorrect=? WHERE id=(SELECT MIN(id)+? FROM Reponse WHERE idQuestion="+id+")")
+        queryUpdateRep = (f"UPDATE Reponse SET text = ?, isCorrect=? WHERE id=(SELECT MIN(id)+? FROM Reponse WHERE idQuestion="+id+")")
 
         if int(id)== questionToJson['position']:
             cursor.execute("begin")
@@ -218,7 +209,7 @@ class db_controller():
             for rep in qst.reponses:
                 #Mise à jour des réponses
                 print(rep)
-                cursor.execute(query2, (rep['text'], str(rep['isCorrect']), cpt))
+                cursor.execute(queryUpdateRep, (rep['text'], str(rep['isCorrect']), cpt))
                 cpt+=1
             cursor.execute("commit")
 
@@ -299,6 +290,23 @@ class db_controller():
         cursor.execute("commit")
         return getPassword[0][2]
 
+    def getAllAnswers(self, position):
+        cursor = self.connexion.cursor()
+        queryID = (f"SELECT id From Question WHERE position="+position)
+        cursor.execute("begin")
+        id = cursor.execute(queryID).fetchone()[0]
+        queryAnswers = (f"SELECT text, isCorrect FROM Reponse where idQuestion="+str(id))
+        answers = cursor.execute(queryAnswers).fetchall()
+        cursor.execute("commit")
+        print(answers)
+        finalAnswers = []
+        for answ in answers:
+            finalAnswers.append({
+                'text': answ[0],
+                'isCorrect': answ[1]
+            })
+        print(finalAnswers)
+        return {'answer':finalAnswers}
 
     
 
